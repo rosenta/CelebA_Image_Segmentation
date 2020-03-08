@@ -271,7 +271,7 @@ class CelebADataset:
             merge_image_list.append(merge_image)
             
 
-        fig, axs = plt.subplots(nrows=2, ncols=3)
+        fig, axs = plt.subplots(nrows=num_images, ncols=3)
         fig.set_figheight(8)
         fig.set_figwidth(15)
         plt.axis('off')
