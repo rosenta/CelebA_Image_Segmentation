@@ -132,11 +132,11 @@ class CelebADataset:
         
         val_datagen = ImageDataGenerator(rescale=rescale)
 
-        train_image_generator = train_datagen.flow_from_directory(train_frames_dir, batch_size = batch_size, class_mode=None, target_size=(512,512))
-        train_mask_generator = train_datagen.flow_from_directory(train_masks_dir, batch_size = batch_size,class_mode=None, target_size=(512,512), color_mode = "grayscale")
-        val_image_generator = val_datagen.flow_from_directory(val_frames_dir, batch_size = batch_size, class_mode=None, target_size=(512,512))
+        train_image_generator = train_datagen.flow_from_directory(train_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
+        train_mask_generator = train_datagen.flow_from_directory(train_masks_dir, batch_size = batch_size,class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
+        val_image_generator = val_datagen.flow_from_directory(val_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
         val_mask_generator = val_datagen.flow_from_directory(val_masks_dir, batch_size = batch_size, class_mode=None,
-        target_size=(512,512), color_mode = "grayscale")
+        target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
 
         train_generator = zip(train_image_generator, train_mask_generator)
         val_generator = zip(val_image_generator, val_mask_generator)
@@ -154,12 +154,12 @@ class CelebADataset:
             for idx in range(count, count+batch_size): #initially from 0 to 16, c = 0. 
 
                 train_img = cv2.imread(os.path.join(img_folder, train_frames_list[idx]))/255.
-                train_img =  cv2.resize(train_img, (512, 512))# Read an image from folder and resize
+                train_img =  cv2.resize(train_img, (Constant.IMG_WIDTH, Constant.IMG_HEIGHT))# Read an image from folder and resize
                 
                 img[idx-count] = train_img #add to array - img[0], img[1], and so on.                                                            
                 train_mask = cv2.imread(os.path.join(mask_folder, train_frames_list[idx]), cv2.IMREAD_GRAYSCALE)/255.
-                train_mask = cv2.resize(train_mask, (512, 512))
-                train_mask = train_mask.reshape(512, 512, 1) # Add extra dimension for parity with train_img size [512 * 512 * 3]
+                train_mask = cv2.resize(train_mask, (Constant.IMG_WIDTH, Constant.IMG_HEIGHT))
+                train_mask = train_mask.reshape(Constant.IMG_WIDTH, Constant.IMG_HEIGHT, 1) # Add extra dimension for parity with train_img size [512 * 512 * 3]
 
                 mask[idx-count] = train_mask
 
@@ -185,26 +185,25 @@ class CelebADataset:
             file_name = file_path.split('.jpg')[0]
 
             img = cv2.imread(os.path.join(train_frames_dir, file_path))
-            base_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            base_img = cv2.resize(img, (Constant.IMG_WIDTH, Constant.IMG_HEIGHT),0)
+            base_img = cv2.cvtColor(base_img, cv2.COLOR_BGR2RGB)
             image_list.append(base_img)
 
             mask = cv2.imread(os.path.join(train_masks_dir, file_path))
+            # mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
             mask_list.append(mask)
 
-            merge_image = cv2.addWeighted(img, 0.7, mask, 0.3, 0.0)
-            merge_image = cv2.cvtColor(merge_image, cv2.COLOR_BGR2RGB)
+            merge_image = cv2.addWeighted(base_img, 0.7, mask, 0.3, 0.0)
+            # merge_image = cv2.cvtColor(merge_image, cv2.COLOR_BGR2RGB)
             merge_image_list.append(merge_image)
             
-        f = plt.figure()
-        plt_size = num_images
 
-        f.set_figheight(5)
-        f.set_figwidth(5)
-        fig, axs = plt.subplots(num_images, 3)
+        fig, axs = plt.subplots(nrows=2, ncols=3)
+        fig.set_figheight(8)
+        fig.set_figwidth(15)
         plt.axis('off')
 
         for plot in range(num_images):
-            
             axs[plot, 0].imshow(image_list[plot], interpolation='nearest')
             axs[plot, 0].set_title('Raw Image')
             axs[plot, 1].imshow(mask_list[plot], interpolation='nearest')
