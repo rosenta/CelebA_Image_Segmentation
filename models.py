@@ -20,7 +20,7 @@ from keras_applications.imagenet_utils import _obtain_input_shape
 import keras.backend as K
 import tensorflow as tf
 
-
+from utils.common_utility import CommonUtility
 from utils.constant import Constant
 from utils.BilinearUpSampling import *
 
@@ -124,7 +124,7 @@ def unet(pretrained_weights = None,input_size = (Constant.IMG_WIDTH,Constant.IMG
     
     model.summary()
 
-    if(pretrained_weights):
+    if(pretrained_weights) and CommonUtility.is_file_exist(pretrained_weights):
     	model.load_weights(pretrained_weights)
 
     return model
