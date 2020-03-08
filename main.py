@@ -40,9 +40,10 @@ class Runner():
         callbacks_list = [checkpoint, csv_logger, earlystopping]
 
         results = train_model.fit_generator(train_gen, epochs=epochs, 
-                                steps_per_epoch = no_of_train_images//batch_size,
+                                steps_per_epoch = 100,
                                 validation_data=val_gen, 
-                                validation_steps=(no_of_val_images//batch_size), 
+                                validation_steps=20,
+                                callbacks=callbacks_list
                                 )
         return results
 
@@ -56,6 +57,7 @@ if __name__ == '__main__':
     # define model
     weights_path = 'best_model.h5'
     model = models.unet(pretrained_weights=weights_path)
-    results = Runner().train(model, epochs=Constant.NUM_EPOCHS, batch_size=Constant.BATCH_SIZE)
+    results = Runner().train(model, epochs=15, batch_size=Constant.BATCH_SIZE)
+    print(results)
  
 
