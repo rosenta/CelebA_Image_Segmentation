@@ -159,7 +159,7 @@ class CelebADataset:
         training_data_list = raw_image_list[:train_data_count]
         testing_data_list = raw_image_list[train_data_count:]
 
-        self.generate_custom_dataset(trai[summary]ning_data_list, base_path, dataset_type='train')
+        self.generate_custom_dataset(training_data_list, base_path, dataset_type='train')
         self.generate_custom_dataset(testing_data_list, base_path, dataset_type='test')
         end = time.time()
         time_diff = end - start
