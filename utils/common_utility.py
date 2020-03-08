@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 __author__ = "Roshan Siyaram Chauhan"
-__copyright__ = "Copyright (©) 2019. Athenas Owl. All rights reserved."
-__credits__ = ["Quantiphi Analytics"]
 
 # python dependencies
 import os
