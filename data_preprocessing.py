@@ -124,19 +124,28 @@ class CelebADataset:
         zoom_range=Constant.ZOOM_RANGE, \
         horizontal_flip=True):
 
-        train_datagen = ImageDataGenerator(
+        train_img_datagen = ImageDataGenerator(
             rescale=rescale,
             shear_range=shear_range,
             zoom_range=zoom_range,
-            horizontal_flip=horizontal_flip)
+            horizontal_flip=horizontal_flip
+            )
         
-        val_datagen = ImageDataGenerator(rescale=rescale)
+        train_mask_datagen = ImageDataGenerator(
+            rescale=rescale,
+            shear_range=shear_range,
+            zoom_range=zoom_range,
+            horizontal_flip=horizontal_flip,
+            dtype=np.bool
+            )
+        
+        val_img_datagen = ImageDataGenerator(rescale=rescale)
+        val_mask_datagen = ImageDataGenerator(rescale=rescale, dtype=np.bool)
 
-        train_image_generator = train_datagen.flow_from_directory(train_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
-        train_mask_generator = train_datagen.flow_from_directory(train_masks_dir, batch_size = batch_size,class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
-        val_image_generator = val_datagen.flow_from_directory(val_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
-        val_mask_generator = val_datagen.flow_from_directory(val_masks_dir, batch_size = batch_size, class_mode=None,
-        target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
+        train_image_generator = train_img_datagen.flow_from_directory(train_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
+        train_mask_generator = train_mask_datagen.flow_from_directory(train_masks_dir, batch_size = batch_size,class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
+        val_image_generator = val_img_datagen.flow_from_directory(val_frames_dir, batch_size = batch_size, class_mode=None, target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT))
+        val_mask_generator = val_mask_datagen.flow_from_directory(val_masks_dir, batch_size = batch_size, class_mode=None,target_size=(Constant.IMG_WIDTH,Constant.IMG_HEIGHT), color_mode = "grayscale")
 
         train_generator = zip(train_image_generator, train_mask_generator)
         val_generator = zip(val_image_generator, val_mask_generator)
@@ -217,7 +226,7 @@ class CelebADataset:
 
 if __name__ == '__main__':
     dataset_object = CelebADataset()
-    dataset_object.mask_folder_creation()
+    # dataset_object.mask_folder_creation()
     dataset_object.visualise_data(num_images=2)
 
     # train_gen, val_gen = dataset_object.data_gen(Constant.TRAIN_FRAMES_DIR, Constant.TRAIN_MASKS_DIR, Constant.VAL_FRAMES_DIR, Constant.VAL_MASKS_DIR)
