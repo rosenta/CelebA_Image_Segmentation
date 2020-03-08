@@ -226,7 +226,7 @@ class CelebADataset:
 
 if __name__ == '__main__':
     dataset_object = CelebADataset()
-    # dataset_object.mask_folder_creation()
+    dataset_object.mask_folder_creation()
     dataset_object.visualise_data(num_images=2)
 
     # train_gen, val_gen = dataset_object.data_gen(Constant.TRAIN_FRAMES_DIR, Constant.TRAIN_MASKS_DIR, Constant.VAL_FRAMES_DIR, Constant.VAL_MASKS_DIR)
