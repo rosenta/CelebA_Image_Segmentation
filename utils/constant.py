@@ -43,6 +43,6 @@ class Constant:
     ZOOM_RANGE = 0.2
     RESCALE = 1./255
 
-    BATCH_SIZE = 16
+    BATCH_SIZE = 4
 
     NUM_EPOCHS = 3
