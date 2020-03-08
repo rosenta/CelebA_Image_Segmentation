@@ -26,6 +26,14 @@ class CelebADataset:
         CommonUtility.create_folder(self.BASE_DIR)
 
     def generate_annotated_folder_info(self, ANNOTATION_DIR=None):
+        """generates mapping of annotated sub folders and it's respective image 
+        
+        Keyword Arguments:
+            ANNOTATION_DIR {str} -- path of annotation Directory  (default: {None})
+        
+        Returns:
+            [list] -- anno_folders_dict_list
+        """
         anno_folders_dict_list = []
 
         if not ANNOTATION_DIR:
@@ -37,30 +45,59 @@ class CelebADataset:
         return anno_folders_dict_list
 
     def find_sub_folder_of_image(self, given_idx):
+        """finds location at which annotated mask file of given image file is present 
+        
+        Arguments:
+            given_idx {str} -- file_name (in numbers)
+        
+        Returns:
+            [str] -- folder_name
+        """
         for folder_dict in self.anno_folders_dict_list:
             if folder_dict["start_idx"] <= int(given_idx) and int(given_idx) <= folder_dict["end_idx"]:
                 return folder_dict["folder_name"]
 
     def merge_mask(self, file_name, alpha=1, beta=1, gamma=0.0):
-            mask_image_data = []
-            mask_folder_name = self.find_sub_folder_of_image(file_name)
-            base_mask_path = os.path.join(mask_folder_name, "{:05d}_{}.png")
+        """ merges masks of eye and lips
+        
+        Arguments:
+            file_name {str} -- name of a given file
+        
+        Keyword Arguments:
+            alpha {int} -- parameters related to first base image  (default: {1})
+            beta {int} -- parameters related to mask image (default: {1})
+            gamma {float} -- parameters for adding weights (default: {0.0})
+        
+        Returns:
+            [ndarray] -- final base_mask or merged mask
+        """
+        mask_image_data = []
+        mask_folder_name = self.find_sub_folder_of_image(file_name)
+        base_mask_path = os.path.join(mask_folder_name, "{:05d}_{}.png")
 
-            left_eye_mask = cv2.imread(base_mask_path.format(int(file_name), "l_eye"))
-            right_eye_mask = cv2.imread(base_mask_path.format(int(file_name), "r_eye"))
-            lower_lip_mask = cv2.imread(base_mask_path.format(int(file_name), "l_lip"))
-            upper_lip_mask = cv2.imread(base_mask_path.format(int(file_name), "u_lip"))
+        left_eye_mask = cv2.imread(base_mask_path.format(int(file_name), "l_eye"))
+        right_eye_mask = cv2.imread(base_mask_path.format(int(file_name), "r_eye"))
+        lower_lip_mask = cv2.imread(base_mask_path.format(int(file_name), "l_lip"))
+        upper_lip_mask = cv2.imread(base_mask_path.format(int(file_name), "u_lip"))
 
-            mask_image_data = [left_eye_mask, right_eye_mask, lower_lip_mask, upper_lip_mask]
-            # Calculate blended image
-            base_mask = np.zeros((self.IMG_WIDTH, self.IMG_HEIGHT, self.CHANNELS), dtype=np.uint8)
-            for idx in range(len(mask_image_data)):
-                if mask_image_data[idx] is not None:
-                    base_mask = cv2.addWeighted(mask_image_data[idx], alpha, base_mask, beta, gamma)
-            return base_mask
+        mask_image_data = [left_eye_mask, right_eye_mask, lower_lip_mask, upper_lip_mask]
+        # Calculate blended image
+        base_mask = np.zeros((self.IMG_WIDTH, self.IMG_HEIGHT, self.CHANNELS), dtype=np.uint8)
+        for idx in range(len(mask_image_data)):
+            if mask_image_data[idx] is not None:
+                base_mask = cv2.addWeighted(mask_image_data[idx], alpha, base_mask, beta, gamma)
+        return base_mask
             
     def generate_custom_dataset(self, data_dir, base_path=Constant.BASE_DIR,  dataset_type='train'): 
+        """Creates A Custom dataset for lips and eye
         
+        Arguments:
+            data_dir {str} -- raw Images directory
+        
+        Keyword Arguments:
+            base_path {str} -- base dataset directory (default: {Constant.BASE_DIR})
+            dataset_type {str} -- type of dataset data (default: {'train'})
+        """
         dataset_mask_path = os.path.join(base_path, dataset_type+"_masks", dataset_type)
         dataset_frame_path = os.path.join(base_path, dataset_type+"_frames", dataset_type)
         CommonUtility.create_folder(dataset_mask_path)
@@ -86,6 +123,14 @@ class CelebADataset:
             start = start + step     
 
     def data_preprocess(self, file_path, data_dir, mask_base_path, img_base_path):
+        """Preprocess data in required format
+        
+        Arguments:
+            file_path {str} -- file_path
+            data_dir {str} -- data_dir 
+            mask_base_path {str} -- mask_base_path
+            img_base_path {str} -- img_base_path
+        """
         file_name = file_path.split('.jpg')[0]
 
         # generating single mask image for lips and eyes
@@ -102,7 +147,11 @@ class CelebADataset:
         CommonUtility.create_copy_of_a_file_to_dest(source_image_path, dest_base_path)
 
     def mask_folder_creation(self, train_split=0.7):
+        """Creates Dataset folders and divides the training and testing data
         
+        Keyword Arguments:
+            train_split {float} -- train_split (default: {0.7})
+        """
         start = time.time()
         base_path = os.path.join(self.BASE_DIR)
         raw_image_list = os.listdir(self.RAW_IMAGE_DIR)
@@ -110,7 +159,7 @@ class CelebADataset:
         training_data_list = raw_image_list[:train_data_count]
         testing_data_list = raw_image_list[train_data_count:]
 
-        self.generate_custom_dataset(training_data_list, base_path, dataset_type='train')
+        self.generate_custom_dataset(trai[summary]ning_data_list, base_path, dataset_type='train')
         self.generate_custom_dataset(testing_data_list, base_path, dataset_type='test')
         end = time.time()
         time_diff = end - start
@@ -123,7 +172,16 @@ class CelebADataset:
         shear_range=Constant.SHEAR_RANGE, \
         zoom_range=Constant.ZOOM_RANGE, \
         horizontal_flip=True):
-
+        """Keras ImageDataGenerator with Augumentation    
+        Arguments:
+            train_frames_dir {str} -- train_frames_dir
+            train_masks_dir {str} -- train_masks_dir
+            val_frames_dir {str} -- val_frames_dir
+            val_masks_dir {str} -- val_masks_dir
+        
+        Returns:
+        train_generator, val_generator {generator} -- train and validation Generator 
+        """
         train_datagen = ImageDataGenerator(
             rescale=rescale,
             shear_range=shear_range,
@@ -143,6 +201,16 @@ class CelebADataset:
         return train_generator, val_generator
 
     def custom_data_gen(self, img_folder, mask_folder, batch_size):
+        """Custom Generator which which yields raw and mask images
+        
+        Arguments:
+            img_folder {str} -- img_folder
+            mask_folder {str} -- mask_folder
+            batch_size {str} -- batch_size
+        
+        Yields:
+            img, mask -- img, mask
+        """
         count = 0
         train_frames_list = os.listdir(img_folder) #List of training images
         random.shuffle(train_frames_list)
@@ -171,8 +239,13 @@ class CelebADataset:
             yield img, mask
 
     def visualise_data(self, num_images=3):
-        """Function will take cluster_id as input and find the similar ROIs out of it and plots them using matplotib aubplot."""
+        """ Function will take num_images as input 
+        and plots the dataset mask and images using matplotib subplot
+
         
+        Keyword Arguments:
+            num_images {int} -- num_images (default: {3})
+        """     
         train_frames_dir = os.path.join(Constant.TRAIN_FRAMES_DIR, 'train')
         train_masks_dir = os.path.join(Constant.TRAIN_MASKS_DIR, 'train')
         raw_images_list = os.listdir(train_frames_dir)

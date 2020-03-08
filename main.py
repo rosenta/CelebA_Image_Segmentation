@@ -17,7 +17,11 @@ class Runner():
     def train(self, train_model, weights_path=None, epochs=Constant.NUM_EPOCHS, \
         batch_size=Constant.BATCH_SIZE, min_delta=0.01, patience=3, log_path="./training.log", \
             monitor='val_acc',):
-
+        """Trains the model based on set of arguments
+        
+        Returns:
+            results -- training results
+        """
         # define generators
         dataset_object = CelebADataset()
         train_gen, val_gen = dataset_object.data_gen(Constant.TRAIN_FRAMES_DIR, Constant.TRAIN_MASKS_DIR, Constant.VAL_FRAMES_DIR, Constant.VAL_MASKS_DIR)
