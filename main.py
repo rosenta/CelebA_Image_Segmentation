@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # define model
     weights_path = 'best_model.h5'
     model = models.unet(pretrained_weights=weights_path)
-    results = Runner().train(model, epochs=15, batch_size=Constant.BATCH_SIZE)
+    results = Runner().train(model, weights_path=weights_path, epochs=15, batch_size=Constant.BATCH_SIZE)
     print(results)
  
 
